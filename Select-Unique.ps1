@@ -20,10 +20,10 @@ function Select-Unique {
 
     begin {
         class PSCustomObjectComparer : IEqualityComparer[object] {
-            [CultureAwareComparer] $Comparer = [StringComparer]::InvariantCultureIgnoreCase
+            [StringComparer] $Comparer = [StringComparer]::InvariantCultureIgnoreCase
 
             PSCustomObjectComparer() { }
-            PSCustomObjectComparer([CultureAwareComparer] $Comparer) {
+            PSCustomObjectComparer([StringComparer] $Comparer) {
                 $this.Comparer = $Comparer
             }
 
