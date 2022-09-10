@@ -72,7 +72,9 @@ function Select-Unique {
         }
 
         $values = foreach($property in $properties) {
-            $InputObject.$property
+            if($value = $InputObject.$property) {
+                $value
+            }
         }
 
         if(-not $hasher.Add($values)) {
@@ -86,9 +88,11 @@ function Select-Unique {
         $out = [ordered]@{}
         foreach($item in $Select) {
             if($item -isnot [hashtable]) {
-                $pair = $InputObject.PSObject.Properties.Item($item)
-                $out[$pair.Name] = $pair.Value
-                continue
+                if($pair = $InputObject.PSObject.Properties.Item($item)) {
+                    $out[$pair.Name] = $pair.Value
+                    continue
+                }
+                $out[$item] = ''
             }
             foreach($key in $item.PSBase.Keys) {
                 if($item[$key] -is [scriptblock]) {

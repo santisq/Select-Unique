@@ -1,11 +1,11 @@
 $numberOfObjects  = 100000
-$numberOfTestRuns = 20
-$numberOfProps    = 3
+$numberOfTestRuns = 10
+$numberOfProps    = 4
 $randomLength     = 3
 
 $ran     = [random]::new()
 $charmap = ''
-[char[]] ([char]'a'..[char]'f') | ForEach-Object { $charmap += $_ }
+[char[]] ([char]'a'..[char]'d') | ForEach-Object { $charmap += $_ }
 
 $properties = foreach($prop in 1..$numberOfProps) {
     "Prop$prop"
@@ -26,14 +26,14 @@ $dataSet = foreach($i in 0..$numberOfObjects) {
 
 $tests = @{
     'Select-Unique' = {
-        $dataSet | Select-Unique -On *
+        ($dataSet | Select-Unique -On *).Count
     }
     'Sort-Object -Unique' = {
-        $dataSet | Sort-Object * -Unique
+        ($dataSet | Sort-Object * -Unique).Count
     }
 }
 
-$results = 1..$numberOfTestRuns | ForEach-Object {
+$allTests = 1..$numberOfTestRuns | ForEach-Object {
     foreach($test in $tests.GetEnumerator()) {
         [pscustomobject]@{
             TestRun           = $_
@@ -43,9 +43,21 @@ $results = 1..$numberOfTestRuns | ForEach-Object {
     }
 } | Sort-Object TotalMilliseconds
 
-$results | Group-Object Test | ForEach-Object {
+$average = $allTests | Group-Object Test | ForEach-Object {
     [pscustomobject]@{
-        Test    = $_.Name
-        Average = [Linq.Enumerable]::Average([double[]] $_.Group.TotalMilliseconds)
+        Test          = $_.Name
+        Average       = [Linq.Enumerable]::Average([double[]] $_.Group.TotalMilliseconds)
+        RelativeSpeed = 0
     }
 } | Sort-Object Average
+
+for($i = 0; $i -lt $average.Count; $i++) {
+    if($i) {
+        $average[$i].RelativeSpeed = ($average[$i].Average / $average[0].Average).ToString('N2') + 'x'
+        return
+    }
+    $average[$i].RelativeSpeed = '1x'
+}
+
+$allTests | Format-Table -AutoSize
+$average  | Format-Table -AutoSize
