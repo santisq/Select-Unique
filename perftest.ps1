@@ -1,7 +1,10 @@
 $numberOfObjects  = 100000
 $numberOfTestRuns = 10
-$numberOfProps    = 4
+$numberOfProps    = 3
 $randomLength     = 3
+
+Invoke-RestMethod https://raw.githubusercontent.com/santysq/Select-Unique/main/Select-Unique.ps1 |
+    Invoke-Expression
 
 $ran     = [random]::new()
 $charmap = ''
@@ -54,7 +57,7 @@ $average = $allTests | Group-Object Test | ForEach-Object {
 for($i = 0; $i -lt $average.Count; $i++) {
     if($i) {
         $average[$i].RelativeSpeed = ($average[$i].Average / $average[0].Average).ToString('N2') + 'x'
-        return
+        continue
     }
     $average[$i].RelativeSpeed = '1x'
 }
